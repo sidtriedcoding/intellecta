@@ -11,7 +11,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send, Paperclip } from "lucide-react";
 import MessageBubble from "@/components/MessageBubble";
 import FileUpload from "@/components/FileUpload";
-import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import FileAttachmentComponent from "@/components/FileAttachment";

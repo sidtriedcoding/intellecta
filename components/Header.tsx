@@ -4,11 +4,10 @@ import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 
 interface HeaderProps {
   onMenuClick: () => void;
-  isSidebarOpen: boolean;
   currentPage: string;
 }
 
-function Header({ onMenuClick, isSidebarOpen, currentPage }: HeaderProps) {
+function Header({ onMenuClick, currentPage }: HeaderProps) {
   return (
     <header className={`
       bg-gray-800 

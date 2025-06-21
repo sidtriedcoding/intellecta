@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
     Upload,
     File,
-    Image,
-    Folder,
     X,
     CheckCircle,
     AlertCircle,
@@ -28,7 +26,6 @@ interface FileUploadProps {
     maxFiles?: number;
     maxSize?: number; // in bytes
     acceptedFileTypes?: string[];
-    className?: string;
     children?: React.ReactNode;
 }
 
@@ -76,14 +73,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
         'video/*',
         'audio/*'
     ],
-    className,
     children
 }) => {
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-    const [isUploading, setIsUploading] = useState(false);
     const [open, setOpen] = useState(false);
 
-    const onDrop = useCallback(async (acceptedFiles: File[], fileRejections: any[]) => {
+    const onDrop = useCallback(async (acceptedFiles: File[], fileRejections: FileRejection[]) => {
         if (fileRejections.length > 0) {
             const error = fileRejections[0].errors[0];
             alert(`File error: ${error.message}`);
@@ -99,7 +94,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }));
 
         setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
-        setIsUploading(true);
 
         try {
             await onFilesSelected(acceptedFiles);
@@ -121,10 +115,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
             setUploadingFiles(prev =>
                 prev.map(f => ({ ...f, status: 'error' as const, error: 'Upload failed' }))
             );
-        } finally {
-            setIsUploading(false);
         }
-    }, [maxFiles, maxSize, onFilesSelected, onUploadComplete]);
+    }, [onFilesSelected, onUploadComplete]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,

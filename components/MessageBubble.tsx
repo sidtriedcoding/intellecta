@@ -22,20 +22,13 @@ interface MessageBubbleProps {
     }>;
 }
 
-const formatMessage = (content: string): string => {
-    //first unescape backslashes
-    content = content.replace(/\\/g, "\\");
+interface CodeBlockProps {
+    inline?: boolean;
+    className?: string;
+    children?: React.ReactNode;
+}
 
-    //handle newlines
-    content = content.replace(/\\n/g, "\n");
-
-    //remove only the markers but keep content between them
-    content = content.replace(/---START---\n?/g, "").replace(/\n?---END---/g, "");
-
-    return content.trim();
-};
-
-const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
+const CodeBlock = ({ inline, className, children, ...props }: CodeBlockProps) => {
     const match = /language-(\w+)/.exec(className || '');
     return !inline && match ? (
         <SyntaxHighlighter style={oneDark} language={match[1]} PreTag="div" {...props}>
@@ -88,7 +81,6 @@ function MessageBubble({ content, isUser, attachments }: MessageBubbleProps) {
                                         fileName={attachment.fileName}
                                         fileType={attachment.fileType}
                                         fileSize={attachment.fileSize}
-                                        fileUrl={attachment.fileUrl}
                                         thumbnailUrl={attachment.thumbnailUrl}
                                         className={isUser ? "bg-blue-500/80" : "bg-gray-100"}
                                     />

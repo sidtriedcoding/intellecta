@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -57,6 +57,7 @@ export default function ChatHistoryPage() {
                 });
                 toast.success("Chat deleted successfully");
             } catch (error) {
+                console.error("Error deleting chat:", error);
                 toast.error("Failed to delete chat");
             }
         }
@@ -74,6 +75,7 @@ export default function ChatHistoryPage() {
                 setSelectedChats(new Set());
                 toast.success(`${selectedChats.size} chats deleted successfully`);
             } catch (error) {
+                console.error("Error deleting selected chats:", error);
                 toast.error("Failed to delete some chats");
             }
         }

@@ -12,7 +12,6 @@ import {
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { MessagesPlaceholder } from "@langchain/core/prompts";
 import SYSTEM_MESSAGE from "@/constants/systemMessage";
-import { DynamicTool } from "@langchain/core/tools";
 import { ChatAnthropic } from "@langchain/anthropic";
 
 //Customers at: https://introspection.apis.stepzen.com/customers
@@ -29,7 +28,7 @@ const trimmer = trimMessages({
 });
 
 // Initialize the AI model with tools
-const initializeModel = (tools: DynamicTool[]) => {
+const initializeModel = () => {
   // Initialize Anthropic's Claude
   const model = new ChatAnthropic({
     modelName: "claude-3-haiku-20240307", // Using Haiku model for better cost efficiency
@@ -127,8 +126,7 @@ const initializeModel = (tools: DynamicTool[]) => {
 // Create the workflow for processing messages
 const createWorkflow = () => {
   // Initialize tools (empty for now, but can be extended)
-  const tools: DynamicTool[] = [];
-  const model = initializeModel(tools);
+  const model = initializeModel();
 
   // Create the prompt template
   const promptTemplate = ChatPromptTemplate.fromMessages([
@@ -172,7 +170,7 @@ const createWorkflow = () => {
       }
     })
     .addEdge(START, "agent")
-    .addNode("tools", new ToolNode(tools))
+    .addNode("tools", new ToolNode([]))
     .addConditionalEdges("agent", shouldContinue)
     .addEdge("tools", "agent");
 
@@ -214,90 +212,3 @@ export async function submitQuestion(messages: BaseMessage[], chatId: string) {
 }
 
 export { createWorkflow, initializeModel };
-
-function addCachingHeaders(messages: BaseMessage[]): BaseMessage[] {
-  //Rules of caching headers for turn-by-turn conversations:
-  //1. cache the first SYSTEM message
-  //2. cache the LAST message
-  //3. cache the second to last HUMAN message
-
-  if (!messages.length) return messages;
-
-  //create a copy of messages to avoid mutating the original
-  const cachedMessages = [...messages];
-
-  const addCache = (message: BaseMessage) => {
-    // Ensure content is in correct format for Anthropic API
-    if (typeof message.content === "string") {
-      message.content = [
-        {
-          type: "text",
-          text: message.content,
-          cache_control: { type: "ephemeral" },
-        },
-      ];
-    } else if (Array.isArray(message.content)) {
-      // Handle case where content is already an array
-      message.content = message.content.map((item) => {
-        if (typeof item === "string") {
-          return {
-            type: "text",
-            text: item,
-            cache_control: { type: "ephemeral" },
-          };
-        } else if (
-          item &&
-          typeof item === "object" &&
-          "type" in item &&
-          item.type === "text" &&
-          "text" in item &&
-          typeof item.text === "string"
-        ) {
-          return {
-            ...item,
-            cache_control: { type: "ephemeral" },
-          };
-        }
-        return item;
-      });
-    }
-  };
-
-  //find and cache the second-to-last human message
-  let humanCount = 0;
-  for (let i = cachedMessages.length - 1; i >= 0; i--) {
-    if (cachedMessages[i] instanceof HumanMessage) {
-      humanCount++;
-      if (humanCount === 2) {
-        //console.log("Caching second-to-last human message");
-        addCache(cachedMessages[i]);
-        break;
-      }
-    }
-  }
-
-  // Cache first SYSTEM message
-  const firstSystemMessage = cachedMessages.find(
-    (msg) => msg.getType() === "system"
-  );
-  if (firstSystemMessage) {
-    addCache(firstSystemMessage);
-  }
-
-  // Cache last message
-  const lastMessage = cachedMessages[cachedMessages.length - 1];
-  if (lastMessage) {
-    addCache(lastMessage);
-  }
-
-  // Cache second to last HUMAN message
-  const humanMessages = cachedMessages.filter(
-    (msg) => msg.getType() === "human"
-  );
-  if (humanMessages.length >= 2) {
-    const secondLastHumanMessage = humanMessages[humanMessages.length - 2];
-    addCache(secondLastHumanMessage);
-  }
-
-  return cachedMessages;
-}

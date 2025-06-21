@@ -19,9 +19,8 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode
 }
 
-interface DialogHeaderProps extends React.HTMLAttributes<HTMLDivElement> { }
-
-interface DialogTitleProps extends React.HTMLAttributes<HTMLHeadingElement> { }
+type DialogHeaderProps = React.HTMLAttributes<HTMLDivElement>;
+type DialogTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 
 const DialogContext = React.createContext<{
     open: boolean
@@ -54,7 +53,7 @@ const DialogTrigger: React.FC<DialogTriggerProps> = ({ asChild, children }) => {
     const { setOpen } = React.useContext(DialogContext)
 
     if (asChild && React.isValidElement(children)) {
-        return React.cloneElement(children as React.ReactElement<any>, {
+        return React.cloneElement(children as React.ReactElement<{ onClick?: () => void }>, {
             onClick: () => setOpen(true),
         })
     }

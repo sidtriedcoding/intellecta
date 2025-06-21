@@ -9,8 +9,6 @@ import {
     FileVideo,
     FileAudio,
     FileSpreadsheet,
-    Download,
-    Eye,
     X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -19,7 +17,6 @@ interface FileAttachmentProps {
     fileName: string;
     fileType: string;
     fileSize: number;
-    fileUrl?: string;
     thumbnailUrl?: string;
     onRemove?: () => void;
     className?: string;
@@ -48,7 +45,6 @@ const FileAttachment: React.FC<FileAttachmentProps> = ({
     fileName,
     fileType,
     fileSize,
-    fileUrl,
     thumbnailUrl,
     onRemove,
     className

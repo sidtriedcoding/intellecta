@@ -1,8 +1,6 @@
 "use client";
 import Header from "@/components/Header";
-import { Authenticated } from "convex/react";
 import { Button } from "@/components/ui/button";
-import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { NavigationProvider, useNavigation } from "@/lib/NavigationProvider";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -132,7 +130,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         ease-in-out
         ${isSidebarOpen ? 'pl-64' : 'pl-0'}
       `}>
-        <Header onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} currentPage={currentPage} />
+        <Header onMenuClick={toggleSidebar} currentPage={currentPage} />
         <main className="flex-1 p-4 overflow-auto">
           {children}
         </main>

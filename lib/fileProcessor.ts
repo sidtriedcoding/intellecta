@@ -1,14 +1,26 @@
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 export interface FileProcessingResult {
     extractedText: string;
     thumbnailUrl?: string;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
+}
+
+interface FileRecord {
+    _id: Id<"files">;
+    fileName: string;
+    fileType: string;
+    mimeType: string;
+    isProcessed: boolean;
+    extractedText?: string;
+    thumbnailUrl?: string;
+    metadata?: Record<string, unknown>;
 }
 
 export class FileProcessor {
-    private convex: any;
+    private convex: ReturnType<typeof getConvexClient>;
 
     constructor(token: string) {
         this.convex = getConvexClient(token);
@@ -17,7 +29,7 @@ export class FileProcessor {
     async processFile(fileId: string): Promise<FileProcessingResult> {
         try {
             // Get file record from Convex
-            const fileRecord = await this.convex.query(api.files.getById, { fileId: fileId as any });
+            const fileRecord = await this.convex.query(api.files.getById, { fileId: fileId as Id<"files"> });
 
             if (!fileRecord) {
                 throw new Error("File not found");
@@ -34,7 +46,7 @@ export class FileProcessor {
 
             let extractedText = "";
             let thumbnailUrl: string | undefined;
-            let metadata: any = {};
+            const metadata: Record<string, unknown> = {};
 
             // Process based on file type
             const fileType = fileRecord.mimeType || fileRecord.fileType;
@@ -69,7 +81,7 @@ export class FileProcessor {
 
             // Update file record with extracted content
             await this.convex.mutation(api.files.updateProcessingStatus, {
-                fileId: fileId as any,
+                fileId: fileId as Id<"files">,
                 isProcessed: true,
                 extractedText,
                 thumbnailUrl,
@@ -87,11 +99,11 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromTextFile(fileRecord: any): Promise<string> {
+    private async extractTextFromTextFile(fileRecord: FileRecord): Promise<string> {
         try {
             // For text files, the content might be stored in metadata
             if (fileRecord.metadata?.base64Data) {
-                const buffer = Buffer.from(fileRecord.metadata.base64Data, 'base64');
+                const buffer = Buffer.from(fileRecord.metadata.base64Data as string, 'base64');
                 return buffer.toString('utf-8');
             }
             return `[Text file: ${fileRecord.fileName}]`;
@@ -101,7 +113,7 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromPDF(fileRecord: any): Promise<string> {
+    private async extractTextFromPDF(fileRecord: FileRecord): Promise<string> {
         try {
             // In a real implementation, you would use a PDF parsing library
             // For now, return a placeholder
@@ -112,7 +124,7 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromWordDocument(fileRecord: any): Promise<string> {
+    private async extractTextFromWordDocument(fileRecord: FileRecord): Promise<string> {
         try {
             // In a real implementation, you would use a Word document parsing library
             return `[Word document: ${fileRecord.fileName} - Content extraction would be implemented with a Word parser]`;
@@ -122,7 +134,7 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromSpreadsheet(fileRecord: any): Promise<string> {
+    private async extractTextFromSpreadsheet(fileRecord: FileRecord): Promise<string> {
         try {
             // In a real implementation, you would use a spreadsheet parsing library
             return `[Spreadsheet: ${fileRecord.fileName} - Content extraction would be implemented with a spreadsheet parser]`;
@@ -132,12 +144,12 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromImage(fileRecord: any): Promise<{ extractedText: string; thumbnailUrl?: string }> {
+    private async extractTextFromImage(fileRecord: FileRecord): Promise<{ extractedText: string; thumbnailUrl?: string }> {
         try {
             // In a real implementation, you would use OCR (Optical Character Recognition)
             // For now, return a placeholder
             const thumbnailUrl = fileRecord.metadata?.base64Data
-                ? `data:${fileRecord.mimeType};base64,${fileRecord.metadata.base64Data}`
+                ? `data:${fileRecord.mimeType};base64,${fileRecord.metadata.base64Data as string}`
                 : undefined;
 
             return {
@@ -152,10 +164,10 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromJSON(fileRecord: any): Promise<string> {
+    private async extractTextFromJSON(fileRecord: FileRecord): Promise<string> {
         try {
             if (fileRecord.metadata?.base64Data) {
-                const buffer = Buffer.from(fileRecord.metadata.base64Data, 'base64');
+                const buffer = Buffer.from(fileRecord.metadata.base64Data as string, 'base64');
                 const jsonContent = buffer.toString('utf-8');
                 const parsed = JSON.parse(jsonContent);
                 return JSON.stringify(parsed, null, 2);
@@ -167,10 +179,10 @@ export class FileProcessor {
         }
     }
 
-    private async extractTextFromMarkdown(fileRecord: any): Promise<string> {
+    private async extractTextFromMarkdown(fileRecord: FileRecord): Promise<string> {
         try {
             if (fileRecord.metadata?.base64Data) {
-                const buffer = Buffer.from(fileRecord.metadata.base64Data, 'base64');
+                const buffer = Buffer.from(fileRecord.metadata.base64Data as string, 'base64');
                 return buffer.toString('utf-8');
             }
             return `[Markdown file: ${fileRecord.fileName}]`;

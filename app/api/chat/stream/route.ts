@@ -10,6 +10,7 @@ import {
 } from "@/lib/types";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { submitQuestion } from "@/lib/langgraph";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface StreamMessage {
     type: string;
@@ -98,7 +99,7 @@ export async function POST(req: Request) {
                         try {
                             // Get file details from Convex
                             const fileRecord = await convex.query(api.files.getById, {
-                                fileId: attachment.fileId as any
+                                fileId: attachment.fileId as Id<"files">
                             });
 
                             if (fileRecord) {
@@ -130,7 +131,7 @@ export async function POST(req: Request) {
                     content: fullContent,
                     role: "user",
                     attachments: attachments ? attachments.map(att => ({
-                        fileId: att.fileId as any,
+                        fileId: att.fileId as Id<"files">,
                         fileName: att.fileName,
                         fileType: att.fileType,
                         fileSize: att.fileSize,
