@@ -1,5 +1,43 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Before running the project, you need to set up your environment variables. Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Convex Configuration
+NEXT_PUBLIC_CONVEX_URL=your_convex_deployment_url
+
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+
+# AI Model Configuration (Anthropic)
+ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# WXFlows Configuration
+WXFLOWS_ENDPOINT=your_wxflows_endpoint
+WXFLOWS_API_KEY=your_wxflows_api_key
+```
+
+### Getting the Required Keys
+
+1. **Convex**: 
+   - Sign up at [Convex](https://www.convex.dev)
+   - Create a new project
+   - Copy the deployment URL from your project settings
+
+2. **Clerk**:
+   - Sign up at [Clerk](https://clerk.dev)
+   - Create a new application
+   - Get your publishable key from the API Keys section
+
+3. **Anthropic**:
+   - Sign up at [Anthropic](https://www.anthropic.com)
+   - Get your API key from the API Keys section
+
+4. **WXFlows**:
+   - Contact your WXFlows administrator for the endpoint and API key
+
 ## Getting Started
 
 First, run the development server:

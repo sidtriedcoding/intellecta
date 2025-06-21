@@ -1,0 +1,48 @@
+flowchart TD
+    A[Initial Request] --> B{Is content<br/>cacheable?}
+    B -->|Yes| C[Create Cache Entry]
+    B -->|No| D[Process Normally]
+    
+    C --> E[Store in Cache<br/>- System prompts<br/>- Documents<br/>- Examples]
+    E --> F[Process Request]
+    F --> G[Return Response]
+    
+    H[Subsequent Request] --> I{Same cached<br/>content?}
+    I -->|Yes - No Mutation| J[Retrieve from Cache]
+    I -->|No - Content Mutated| K[Cache Miss]
+    
+    J --> L[Process Only New Parts]
+    L --> M[Fast Response<br/>Lower Cost]
+    
+    K --> N{What Changed?}
+    N -->|Minor Change| O[Partial Cache Hit]
+    N -->|Major Change| P[Full Reprocessing]
+    N -->|Structure Change| Q[Cache Invalidation]
+    
+    O --> R[Mixed Processing<br/>Some Cached + Some New]
+    P --> S[No Cache Benefit<br/>Full Cost]
+    Q --> T[Rebuild Cache<br/>High Cost]
+    
+    R --> U[Moderate Cost<br/>Reduced Speed]
+    S --> V[High Cost<br/>Slow Response]
+    T --> W[Initial Cache Cost<br/>+ Processing]
+    
+    subgraph "Message Mutation Examples"
+        X[✅ Safe: Adding user query<br/>to cached system prompt]
+        Y[⚠️ Risky: Changing prompt<br/>structure or order]
+        Z[❌ Breaking: Modifying<br/>cached content itself]
+    end
+    
+    subgraph "Cache Optimization"
+        AA[Keep stable content<br/>at prompt boundaries]
+        BB[Separate variable<br/>from fixed content]
+        CC[Use consistent<br/>formatting patterns]
+    end
+    
+    style C fill:#e1f5fe
+    style J fill:#c8e6c9
+    style K fill:#ffcdd2
+    style Q fill:#ffcdd2
+    style X fill:#c8e6c9
+    style Y fill:#fff3e0
+    style Z fill:#ffcdd2
